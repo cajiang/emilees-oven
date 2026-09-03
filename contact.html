@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — Emilees Oven</title>
+<meta name="description" content="How to reach Emilees Oven.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Bitter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <span class="wordmark">Emilees Oven</span>
+      <span class="tagline">Fresh-Baked · Made With Love</span>
+    </a>
+    <nav class="main-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="about.html">About</a>
+      <a href="contact.html" class="active" aria-current="page">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap section">
+    <div class="placeholder-banner">
+      <strong>Placeholder details</strong> — the email, phone, social, and payment handles below are examples. Replace them with real ones before launch.
+    </div>
+
+    <section class="hero" style="margin-bottom:30px;">
+      <p class="eyebrow">Say hello</p>
+      <h1>Get in touch</h1>
+      <p>Questions, allergies, or a special request? Reach out — Emilee reads every message.</p>
+    </section>
+
+    <div class="contact-grid">
+      <div class="card">
+        <h2 class="script">Reach the bakery</h2>
+        <p class="section-sub">The best ways to get in touch</p>
+
+        <p class="contact-line"><strong>Email</strong> <a href="mailto:hello@example.com">hello@example.com</a> <em>(placeholder)</em></p>
+        <p class="contact-line"><strong>Phone / Text</strong> (555) 010-0000 <em>(placeholder)</em></p>
+        <p class="contact-line"><strong>Instagram</strong> @emilees-oven-placeholder <em>(placeholder)</em></p>
+        <p class="contact-line"><strong>Pickup area</strong> [Your neighborhood / city — placeholder]</p>
+
+        <div class="pay-box" style="margin-top:18px;">
+          <span class="wip">Work in progress</span>
+          <h3>Payment</h3>
+          <p style="margin:0;">Payment is arranged directly with Emilee after she confirms your reservation:</p>
+          <p style="margin:8px 0 0;">Zelle: <code>PLACEHOLDER-zelle@example.com</code><br>
+          Venmo: <code>@PLACEHOLDER-Emilees-Oven</code></p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="script">Send a message</h2>
+        <p class="section-sub">Not a reservation — just a note to Emilee</p>
+
+        <form id="contact-form" novalidate>
+          <div class="field">
+            <label for="cf-name">Your name <span class="req">*</span></label>
+            <input id="cf-name" name="name" type="text" autocomplete="name" required>
+            <div class="field-error" data-err="name" hidden>Please enter your name.</div>
+          </div>
+          <div class="field">
+            <label for="cf-email">Email <span class="req">*</span></label>
+            <input id="cf-email" name="email" type="email" autocomplete="email" inputmode="email" required>
+            <div class="field-error" data-err="email" hidden>Please enter a valid email.</div>
+          </div>
+          <div class="field">
+            <label for="cf-message">Message <span class="req">*</span></label>
+            <textarea id="cf-message" name="message" rows="4" required></textarea>
+            <div class="field-error" data-err="message" hidden>Please write a short message.</div>
+          </div>
+          <button class="btn" type="submit">Send message</button>
+          <p class="mock-flag">This form is a placeholder — it doesn’t send anything yet. To reserve cookies, use the <a href="products.html">Products</a> page.</p>
+        </form>
+
+        <div id="contact-done" class="pay-box" hidden style="background:var(--paper-2);border-color:var(--olive);color:var(--burnt-umber);">
+          <h3 style="margin:0 0 6px;">Thanks! (demo only)</h3>
+          <p style="margin:0;">This is a preview, so your message wasn’t actually sent. For now, please email
+          <a href="mailto:hello@example.com">hello@example.com</a> (placeholder).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span class="foot-word">Emilees Oven</span>
+    <span>Small-batch cookies · baked to order</span>
+    <span>Private preview — not for public sharing. All content shown is placeholder.</span>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+<script>
+  /* Contact form is a local placeholder only — no submission wired.
+     (Reservations, not this form, go through submitReservation() in app.js.) */
+  (function () {
+    var form = document.getElementById("contact-form");
+    if (!form) return;
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var ok = true;
+      function mark(name, bad) {
+        var el = form.querySelector('[data-err="' + name + '"]');
+        if (el) el.hidden = !bad;
+      }
+      var name = form.name.value.trim();
+      var email = form.email.value.trim();
+      var message = form.message.value.trim();
+      var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      mark("name", !name); if (!name) ok = false;
+      mark("email", !emailOk); if (!emailOk) ok = false;
+      mark("message", !message); if (!message) ok = false;
+      if (!ok) return;
+      form.hidden = true;
+      document.getElementById("contact-done").hidden = false;
+    });
+  })();
+</script>
+</body>
+</html>

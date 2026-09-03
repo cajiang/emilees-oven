@@ -1,0 +1,319 @@
+/* ============================================================
+   Emilees Oven — MODERN homepage styles (BRIEF-06)
+   Scope: index-modern.html ONLY. Kept separate from styles.css.
+   Direction: modern & sleek (clean, minimal, generous whitespace,
+   confident type) BUT bridged to the "Warm & Homey" brand via a
+   cinnamon/caramel warm accent so it doesn't clash with the
+   existing Products/Contact pages it links to.
+   Mobile-first, plain CSS, no build step.
+   ============================================================ */
+
+:root{
+  /* -----------------------------------------------------------
+     HERO IMAGE — one-line swap point.
+     Mae Mu "cookies in a bowl", Unsplash (Unsplash License,
+     free commercial, no attribution). Hotlinked, not downloaded.
+     ----------------------------------------------------------- */
+  --hero-image: url("https://images.unsplash.com/photo-1558961363-fa8fdf82db35?q=80&w=2400&auto=format&fit=crop"); /* SWAP: replace with your own photo (local file or URL) */
+
+  /* -----------------------------------------------------------
+     TRIAL PALETTE (BRIEF-07) — user-supplied swatches.
+     Used exactly as given, EXCEPT "Burnt Umber": the palette
+     card listed #4C389F, which is purple and contradicts its
+     brown swatch, so a swatch-accurate dark brown is used.
+     ----------------------------------------------------------- */
+  --olive:#78822C;          /* accent — brand olive (secondary accent) */
+  --olive-deep:#566020;     /* derived deeper olive for accents on eggshell surfaces
+                               (cards/header/footer) & anywhere base olive would miss
+                               3:1. ~4.2:1 on eggshell, ~5.9:1 on paper. */
+  --eggshell:#C9CDCA;       /* light surface (cards, footer) */
+  --english-rose:#E2939A;   /* secondary/dusty-rose accent */
+  --cinnamon:#9A5E40;       /* warm brown — CTA + warm accents */
+  --burnt-umber:#4C382B;    /* corrected brown (card's #4C389F was purple) */
+
+  /* semantic tokens mapped onto the palette */
+  --cinnamon-dark:var(--burnt-umber); /* CTA/hover darken */
+  --caramel:var(--cinnamon);          /* legacy alias -> warm */
+  --honey:var(--english-rose);        /* legacy alias -> rose */
+
+  /* neutrals derived to sit with Eggshell (kept for AA legibility) */
+  --ink:var(--burnt-umber);   /* primary text */
+  --ink-soft:#6B4F3D;         /* secondary text (AA on eggshell + paper) */
+  --ink-faint:#6B4F3D;        /* fine print (kept readable, not too light) */
+  --paper:#F1EBE4;            /* page background — REORIENTED to a warm off-white (derived
+                                warm neutral, cinnamon/umber family, no new hue). umber 9.3:1 */
+  --paper-2:#DFE3E0;          /* subtle hover / alt surface */
+  --line:#B7BEB8;             /* borders — soft eggshell edge */
+  --white:#ffffff;            /* card interior for contrast pop */
+
+  /* ---- REORIENTATION tokens (BRIEF-10): dark warm chrome, olive-led CTA ---- */
+  --chrome:var(--burnt-umber);        /* dark warm band for nav + footer */
+  --on-chrome-muted:var(--eggshell);  /* muted light text on the dark chrome (6.85:1) */
+
+  /* fonts — refined serif display for the name, crisp sans body */
+  --font-display:"Fraunces","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --font-body:"Inter","Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;
+
+  --maxw:1120px;
+  --nav-h:64px;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:16px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+img{max-width:100%;display:block;}
+
+/* respect reduced-motion for smooth scroll */
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto;}
+}
+
+/* ---------- a11y helpers ---------- */
+.visually-hidden{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap;border:0;
+}
+.skip-link{
+  position:absolute;left:-999px;top:0;z-index:200;
+  background:var(--cinnamon);color:#fff;padding:10px 16px;border-radius:0 0 10px 0;
+  font-weight:600;text-decoration:none;
+}
+.skip-link:focus{left:0;}
+
+/* visible focus everywhere */
+a:focus-visible,button:focus-visible,.btn:focus-visible{
+  outline:3px solid var(--cinnamon);
+  outline-offset:3px;
+  border-radius:4px;
+}
+
+/* ---------- layout ---------- */
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
+
+/* ============================================================
+   Sticky top nav
+   ============================================================ */
+.site-nav{
+  position:sticky;top:0;z-index:100;
+  height:var(--nav-h);
+  background:rgba(76,56,43,.86); /* REORIENTED: translucent dark Burnt-Umber chrome (was light) */
+  backdrop-filter:saturate(140%) blur(12px);
+  -webkit-backdrop-filter:saturate(140%) blur(12px);
+  border-bottom:2px solid var(--english-rose); /* rose keyline on the dark bar */
+}
+.site-nav .wrap{
+  height:100%;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.nav-brand{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:20px;
+  letter-spacing:-.01em;
+  color:#fff; /* light brand on dark chrome */
+  text-decoration:none;
+  white-space:nowrap;
+}
+.nav-brand .dot{color:var(--english-rose);} /* REORIENTED: rose brand dot on dark chrome (4.65:1) */
+.nav-links{
+  display:flex;align-items:center;gap:2px;
+  list-style:none;margin:0;padding:0;
+}
+.nav-links a{
+  display:inline-block;
+  text-decoration:none;
+  color:var(--on-chrome-muted); /* light nav links on dark chrome (6.85:1) */
+  font-size:14.5px;font-weight:500;
+  padding:8px 12px;border-radius:999px;
+  transition:background .15s ease,color .15s ease;
+}
+.nav-links a:hover{background:rgba(255,255,255,.14);color:#fff;} /* light hover pill on dark bar */
+.nav-links a.nav-cta{
+  background:var(--olive-deep);color:#fff;font-weight:600; /* REORIENTED: Olive promoted to CTA (white text 6.8:1) */
+  padding:8px 16px;
+}
+.nav-links a.nav-cta:hover{background:var(--cinnamon-dark);color:#fff;} /* darkens to umber on hover (11:1) */
+
+/* On narrow screens the four core links stay; the bonus CTA
+   (redundant with the hero button) is hidden so nothing wraps. */
+@media (max-width:560px){
+  .nav-links a.nav-cta{display:none;}
+}
+@media (max-width:420px){
+  .nav-brand{font-size:18px;}
+  .nav-links{gap:0;}
+  .nav-links a{padding:7px 8px;font-size:13.5px;}
+  .wrap{padding:0 16px;}
+}
+
+/* ============================================================
+   Full-bleed hero
+   ============================================================ */
+.hero{
+  position:relative;
+  min-height:calc(100svh - var(--nav-h));
+  display:flex;align-items:flex-end;
+  overflow:hidden;
+  isolation:isolate;
+}
+/* image + dark scrim for AA-legible overlaid text */
+.hero::before{
+  content:"";
+  position:absolute;inset:0;z-index:-2;
+  background-image:var(--hero-image);
+  background-size:cover;
+  background-position:center;
+}
+.hero::after{
+  content:"";
+  position:absolute;inset:0;z-index:-1;
+  /* scrim tinted to Burnt Umber (76,56,43) and deepened toward the
+     bottom so the hero heading + CTA row stay AA-legible over the photo */
+  background:
+    linear-gradient(180deg, rgba(30,20,14,.42) 0%, rgba(30,20,14,.15) 34%, rgba(30,20,14,.66) 80%, rgba(20,13,8,.90) 100%);
+}
+.hero-inner{
+  width:100%;
+  padding-top:72px;padding-bottom:64px;
+}
+.hero-eyebrow{
+  display:inline-block;
+  font-size:12px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--english-rose);
+  margin:0 0 16px;
+  text-shadow:0 1px 6px rgba(0,0,0,.5);
+}
+.hero h1{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:clamp(44px,10vw,104px);
+  line-height:.98;
+  letter-spacing:-.02em;
+  color:#fff;
+  margin:0 0 18px;
+  text-shadow:0 2px 22px rgba(0,0,0,.45);
+}
+.hero p.lede{
+  max-width:38ch;
+  font-size:clamp(16px,2.4vw,20px);
+  line-height:1.5;
+  color:#f3ece2;
+  margin:0 0 30px;
+  text-shadow:0 1px 10px rgba(0,0,0,.55);
+}
+.hero-actions{display:flex;flex-wrap:wrap;gap:14px;align-items:center;}
+.scroll-hint{
+  position:absolute;left:50%;bottom:18px;transform:translateX(-50%);
+  color:#f6ede1;font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+  opacity:.85;text-shadow:0 1px 6px rgba(0,0,0,.6);
+}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  font:inherit;font-weight:600;font-size:15.5px;
+  text-decoration:none;cursor:pointer;border:none;
+  padding:14px 26px;border-radius:999px;
+  transition:transform .06s ease,background .15s ease,box-shadow .15s ease;
+}
+.btn-primary{
+  background:var(--olive-deep);color:#fff; /* REORIENTED: Olive promoted to primary CTA (white text 6.8:1) */
+  box-shadow:0 8px 24px rgba(86,96,32,.45); /* olive glow to match */
+}
+.btn-primary:hover{background:var(--cinnamon-dark);} /* darkens to umber on hover (11:1) */
+.btn-primary:active{transform:translateY(1px);}
+.btn-ghost{
+  background:rgba(255,255,255,.12);color:#fff;
+  border:1.5px solid rgba(255,255,255,.7);
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+}
+.btn-ghost:hover{background:rgba(255,255,255,.22);}
+
+/* ============================================================
+   About section (folded into bottom)
+   ============================================================ */
+.about{
+  background:var(--paper);
+  padding:96px 0;
+  scroll-margin-top:var(--nav-h);
+}
+.about-head{max-width:640px;margin:0 0 56px;}
+.about .kicker{
+  font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--olive-deep);margin:0 0 14px; /* REORIENTED: olive kicker — small text needs 4.5:1, olive-deep on warm paper = 5.7:1 */
+}
+.about h2{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:clamp(30px,5vw,50px);
+  line-height:1.05;letter-spacing:-.015em;
+  color:var(--ink);margin:0 0 18px;
+}
+/* olive accent bar under the section heading (deep olive: AA on any surface) */
+.about h2::after{
+  content:"";
+  display:block;
+  width:56px;height:4px;margin-top:18px;
+  background:var(--olive-deep);
+  border-radius:999px;
+}
+.about-head p{font-size:18px;color:var(--ink-soft);margin:0;}
+
+.about-grid{
+  display:grid;gap:28px;
+  grid-template-columns:1fr;
+}
+@media (min-width:760px){
+  .about-grid{grid-template-columns:repeat(3,1fr);}
+}
+.about-card{
+  background:var(--eggshell);
+  border:1px solid var(--line);
+  border-top:3px solid var(--olive-deep); /* olive top-accent (deep olive on eggshell = 4.23:1) */
+  border-radius:18px;
+  padding:28px;
+}
+.about-card .num{
+  font-family:var(--font-display);
+  font-size:22px;color:var(--caramel);font-weight:600;
+  margin:0 0 10px;
+}
+.about-card h3{
+  font-size:19px;font-weight:600;color:var(--ink);margin:0 0 10px;
+}
+.about-card p{font-size:15px;color:var(--ink-soft);margin:0;}
+
+.placeholder-tag{
+  display:inline-block;
+  font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--cinnamon-dark);background:var(--honey);
+  padding:3px 9px;border-radius:999px;margin-bottom:16px;
+}
+
+/* ============================================================
+   Footer
+   ============================================================ */
+.site-foot{
+  background:var(--chrome); /* REORIENTED: dark Burnt-Umber footer band (was light eggshell) */
+  border-top:3px solid var(--english-rose); /* rose keyline on the dark band */
+  padding:40px 0;
+}
+.site-foot .wrap{
+  display:flex;flex-wrap:wrap;gap:12px 24px;
+  align-items:center;justify-content:space-between;
+}
+.foot-word{
+  font-family:var(--font-display);font-weight:600;font-size:20px;color:#fff; /* light brand word on dark chrome */
+}
+.foot-word .dot{color:var(--english-rose);} /* rose dot accent (4.65:1) */
+.site-foot p{margin:0;font-size:13px;color:var(--on-chrome-muted);} /* light fine print on dark chrome (6.85:1) */
+.site-foot a{color:var(--english-rose);} /* rose links on dark chrome (4.65:1) */

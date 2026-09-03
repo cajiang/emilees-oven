@@ -1,0 +1,61 @@
+{
+  "_note": "PLACEHOLDER DATA — replace every value below with real cookie info before going live. See HOW-TO-UPDATE.md for plain-language instructions. Prices, quantities, ingredients and allergens shown here are examples only.",
+  "currency": "USD",
+  "products": [
+    {
+      "id": "brown-butter-choc-chip",
+      "name": "Brown Butter Chocolate Chip",
+      "price": 3.50,
+      "quantityAvailable": 12,
+      "isStaple": true,
+      "description": "PLACEHOLDER — the everyday staple. Crisp edges, a soft gooey center, browned butter for a deep toffee flavor.",
+      "ingredients": ["Flour (wheat)", "Butter", "Brown sugar", "Cane sugar", "Eggs", "Semisweet chocolate", "Vanilla", "Baking soda", "Salt"],
+      "allergens": ["Wheat", "Gluten", "Dairy", "Egg", "Soy"],
+      "imagePlaceholderLabel": "Brown Butter Choc Chip"
+    },
+    {
+      "id": "pumpkin-snickerdoodle",
+      "name": "Pumpkin Snickerdoodle",
+      "price": 4.00,
+      "quantityAvailable": 6,
+      "isStaple": false,
+      "description": "PLACEHOLDER — seasonal. Soft pumpkin-spiced cookie rolled in cinnamon sugar with a crackly top.",
+      "ingredients": ["Flour (wheat)", "Butter", "Pumpkin puree", "Cane sugar", "Egg", "Cinnamon", "Nutmeg", "Cream of tartar", "Baking soda", "Salt"],
+      "allergens": ["Wheat", "Gluten", "Dairy", "Egg"],
+      "imagePlaceholderLabel": "Pumpkin Snickerdoodle"
+    },
+    {
+      "id": "maple-oat-pecan",
+      "name": "Maple Oat Pecan",
+      "price": 4.00,
+      "quantityAvailable": 8,
+      "isStaple": false,
+      "description": "PLACEHOLDER — seasonal. Chewy oat cookie with toasted pecans and real maple.",
+      "ingredients": ["Flour (wheat)", "Rolled oats", "Butter", "Maple syrup", "Brown sugar", "Egg", "Pecans", "Baking soda", "Salt"],
+      "allergens": ["Wheat", "Gluten", "Dairy", "Egg", "Tree nuts (pecan)"],
+      "imagePlaceholderLabel": "Maple Oat Pecan"
+    },
+    {
+      "id": "double-chocolate",
+      "name": "Double Chocolate Fudge",
+      "price": 4.00,
+      "quantityAvailable": 0,
+      "isStaple": false,
+      "description": "PLACEHOLDER — seasonal. Rich cocoa dough loaded with dark and white chocolate chunks. (Shown here sold out to demonstrate the sold-out state.)",
+      "ingredients": ["Flour (wheat)", "Butter", "Cocoa", "Cane sugar", "Eggs", "Dark chocolate", "White chocolate", "Vanilla", "Baking soda", "Salt"],
+      "allergens": ["Wheat", "Gluten", "Dairy", "Egg", "Soy"],
+      "imagePlaceholderLabel": "Double Chocolate Fudge"
+    },
+    {
+      "id": "lemon-shortbread",
+      "name": "Lemon Cornmeal Shortbread",
+      "price": 3.75,
+      "quantityAvailable": 10,
+      "isStaple": false,
+      "description": "PLACEHOLDER — seasonal. Buttery shortbread with bright lemon zest and a delicate cornmeal crunch. Nut-free.",
+      "ingredients": ["Flour (wheat)", "Cornmeal", "Butter", "Powdered sugar", "Lemon zest", "Vanilla", "Salt"],
+      "allergens": ["Wheat", "Gluten", "Dairy"],
+      "imagePlaceholderLabel": "Lemon Cornmeal Shortbread"
+    }
+  ]
+}

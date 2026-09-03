@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Products — Emilees Oven</title>
+<meta name="description" content="This week's small-batch cookies from Emilees Oven. Reserve your favorites.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Bitter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <span class="wordmark">Emilees Oven</span>
+      <span class="tagline">Fresh-Baked · Made With Love</span>
+    </a>
+    <nav class="main-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="products.html" class="active" aria-current="page">Products
+        <span class="nav-cart-count" data-cart-count hidden>0</span></a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap section">
+    <div class="placeholder-banner">
+      <strong>Placeholder menu</strong> — every cookie, price, quantity, ingredient list, and allergen below is example data from <code>products.json</code>. Replace with real info before launch. Please still double-check allergens with Emilee.
+    </div>
+
+    <div class="center" style="margin-bottom:26px;">
+      <h1 class="script" style="font-size:clamp(38px,9vw,58px);color:var(--cinnamon);margin:0 0 4px;">This Week’s Batch</h1>
+      <p class="section-sub">Baked to order · limited quantities · reserve to claim</p>
+    </div>
+
+    <div id="product-list" class="product-grid" aria-live="polite">
+      <!-- Cards render here from products.json via products.js -->
+      <div class="card" style="grid-column:1/-1;text-align:center;">
+        <p>Loading this week’s cookies…</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Floating reservation tray (shows when items are selected) -->
+<div id="reserve-tray" class="tray" aria-live="polite">
+  <div class="wrap">
+    <span class="tray-summary" data-tray-summary>No items selected yet.</span>
+    <button class="btn" type="button" data-open-reserve disabled>Review reservation</button>
+  </div>
+</div>
+
+<!-- Reservation modal (form + confirmation render into it) -->
+<div id="reserve-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Reserve your cookies" hidden>
+  <div class="modal" data-modal-body>
+    <!-- filled by app.js -->
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span class="foot-word">Emilees Oven</span>
+    <span>Small-batch cookies · baked to order</span>
+    <span>Private preview — not for public sharing. All content shown is placeholder.</span>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+<script src="products.js"></script>
+</body>
+</html>

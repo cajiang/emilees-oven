@@ -3,6 +3,11 @@
    Fetches products.json and renders product cards on
    products.html. Uses the shared cart in app.js.
 
+   Each product has one or more pack-size "options" (e.g. Half
+   dozen / Dozen). Customers pick an option, choose how many of
+   that pack to reserve, and add it — the cart line carries the
+   chosen pack's label and price (or null while price is TBD).
+
    NOTE: browsers block fetch() of local files when a page is
    opened directly with the file:// protocol. If that happens
    we show a friendly notice explaining how to preview locally.
@@ -17,7 +22,9 @@
   var mount = document.getElementById("product-list");
   if (!mount) return;
 
-  function money(n) { return EO ? EO.money(n) : "$" + Number(n).toFixed(2); }
+  function priceLabel(price) {
+    return typeof price === "number" ? (EO ? EO.money(price) : "$" + Number(price).toFixed(2)) : "Price TBD";
+  }
 
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
@@ -68,26 +75,29 @@
     if (EO) EO.renderCartUI();
   }
 
+  function allergenBlock(p) {
+    var allergens = Array.isArray(p.allergens) ? p.allergens : [];
+    if (p.allergensTBD) {
+      if (allergens.length) {
+        return '<div class="allergen-flag"><span class="warn-ico" aria-hidden="true">⚠️</span>' +
+          '<span><strong>Allergens:</strong> ' + escapeHtml(allergens.join(", ")) + '. ' +
+          escapeHtml(p.allergensNote || "Additional item(s) TBD — check with baker.") + '</span></div>';
+      }
+      return '<div class="allergen-flag"><span class="warn-ico" aria-hidden="true">⚠️</span>' +
+        '<span><strong>Allergens:</strong> check with baker (TBD)</span></div>';
+    }
+    return allergens.length
+      ? '<div class="allergen-flag"><span class="warn-ico" aria-hidden="true">⚠️</span>' +
+        '<span><strong>Allergens:</strong> ' + escapeHtml(allergens.join(", ")) + '</span></div>'
+      : '<div class="allergen-none">No allergens listed — always confirm with Emilee if you have a serious allergy.</div>';
+  }
+
   function card(p) {
-    var soldOut = !(p.quantityAvailable > 0);
+    var options = Array.isArray(p.options) && p.options.length ? p.options : [{ id: "default", label: p.name, count: 1, price: null }];
+    var selected = 0;
+
     var el = document.createElement("article");
     el.className = "card product-card";
-
-    var allergens = Array.isArray(p.allergens) ? p.allergens : [];
-    var ingredients = Array.isArray(p.ingredients) ? p.ingredients : [];
-
-    var allergenBlock = allergens.length
-      ? '<div class="allergen-flag"><span class="warn-ico" aria-hidden="true">⚠️</span>' +
-        '<span><strong>Contains:</strong> ' + escapeHtml(allergens.join(", ")) + '</span></div>'
-      : '<div class="allergen-none">No major allergens listed — always confirm with Emilee if you have a serious allergy.</div>';
-
-    var qtyBadge = soldOut
-      ? '<span class="qty-badge sold-out">Sold out this week</span>'
-      : '<span class="qty-badge">' + p.quantityAvailable + ' left this week</span>';
-
-    var staple = p.isStaple
-      ? ' <span class="qty-badge" style="background:var(--sage);color:#fff;">Staple</span>'
-      : "";
 
     el.innerHTML =
       '<div class="product-photo" role="img" aria-label="Placeholder photo of ' +
@@ -95,63 +105,88 @@
         '<span class="photo-tag">' + escapeHtml(p.imagePlaceholderLabel || p.name) + '<br><small style="font-family:var(--font-body);font-size:11px;letter-spacing:.05em;">photo coming soon</small></span>' +
       '</div>' +
       '<div class="product-body">' +
-        '<h3 class="product-name">' + escapeHtml(p.name) + staple + '</h3>' +
+        '<h3 class="product-name">' + escapeHtml(p.name) + '</h3>' +
+        '<div class="pack-selector" data-pack-selector role="group" aria-label="Pack size for ' + escapeHtml(p.name) + '"></div>' +
         '<div class="product-price-row">' +
-          '<span class="product-price">' + money(p.price) + '</span>' +
-          qtyBadge +
+          '<span class="product-price" data-price>' + priceLabel(options[0].price) + '</span>' +
         '</div>' +
         '<p class="product-desc">' + escapeHtml(p.description || "") + '</p>' +
-        '<div class="ingredients">' +
-          '<h4>Ingredients</h4>' +
-          '<p>' + (ingredients.length ? escapeHtml(ingredients.join(", ")) : "Not listed") + '</p>' +
-          allergenBlock +
-        '</div>' +
+        allergenBlock(p) +
       '</div>';
+
+    var priceEl = el.querySelector("[data-price]");
+    var selectorEl = el.querySelector("[data-pack-selector]");
+
+    function selectOption(idx) {
+      selected = idx;
+      priceEl.textContent = priceLabel(options[selected].price);
+      var btns = selectorEl.querySelectorAll("[data-opt]");
+      Array.prototype.forEach.call(btns, function (b) {
+        var isSel = parseInt(b.getAttribute("data-opt"), 10) === idx;
+        b.classList.toggle("is-selected", isSel);
+        b.setAttribute("aria-pressed", isSel ? "true" : "false");
+      });
+    }
+
+    if (options.length > 1) {
+      options.forEach(function (opt, idx) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "pack-btn";
+        btn.setAttribute("data-opt", idx);
+        btn.setAttribute("aria-pressed", idx === 0 ? "true" : "false");
+        btn.textContent = opt.label;
+        btn.addEventListener("click", function () { selectOption(idx); });
+        selectorEl.appendChild(btn);
+      });
+      selectOption(0);
+    } else {
+      selectorEl.innerHTML = '<span class="pack-single">' + escapeHtml(options[0].label) + '</span>';
+    }
 
     // add-to-reservation row
     var addRow = document.createElement("div");
     addRow.className = "add-row";
     addRow.style.padding = "0 20px 20px";
 
-    if (soldOut) {
-      addRow.innerHTML = '<span class="mock-flag" style="margin:0;">Not available to reserve right now.</span>';
-    } else {
-      var max = p.quantityAvailable;
-      addRow.innerHTML =
-        '<div class="qty-picker" role="group" aria-label="Quantity for ' + escapeHtml(p.name) + '">' +
-          '<button type="button" data-step="-1" aria-label="Decrease quantity">−</button>' +
-          '<input type="number" min="1" max="' + max + '" value="1" ' +
-            'aria-label="Quantity for ' + escapeHtml(p.name) + '">' +
-          '<button type="button" data-step="1" aria-label="Increase quantity">+</button>' +
-        '</div>' +
-        '<button class="btn btn-small" type="button" data-add>Add to reservation</button>';
+    var maxQty = 10; // no stock data — soft ceiling to keep the stepper reasonable
+    addRow.innerHTML =
+      '<div class="qty-picker" role="group" aria-label="Number of packs for ' + escapeHtml(p.name) + '">' +
+        '<button type="button" data-step="-1" aria-label="Decrease quantity">−</button>' +
+        '<input type="number" min="1" max="' + maxQty + '" value="1" ' +
+          'aria-label="Number of packs for ' + escapeHtml(p.name) + '">' +
+        '<button type="button" data-step="1" aria-label="Increase quantity">+</button>' +
+      '</div>' +
+      '<button class="btn btn-small" type="button" data-add>Add to reservation</button>';
 
-      var input = addRow.querySelector("input");
-      var minus = addRow.querySelector('[data-step="-1"]');
-      var plus = addRow.querySelector('[data-step="1"]');
+    var input = addRow.querySelector("input");
+    var minus = addRow.querySelector('[data-step="-1"]');
+    var plus = addRow.querySelector('[data-step="1"]');
 
-      function clamp() {
-        var v = parseInt(input.value, 10);
-        if (isNaN(v) || v < 1) v = 1;
-        if (v > max) v = max;
-        input.value = v;
-        minus.disabled = v <= 1;
-        plus.disabled = v >= max;
-      }
-      minus.addEventListener("click", function () { input.value = (parseInt(input.value,10)||1) - 1; clamp(); });
-      plus.addEventListener("click", function () { input.value = (parseInt(input.value,10)||1) + 1; clamp(); });
-      input.addEventListener("input", clamp);
-      clamp();
-
-      addRow.querySelector("[data-add]").addEventListener("click", function () {
-        var qty = parseInt(input.value, 10) || 1;
-        if (EO) EO.cart.add({ id: p.id, name: p.name, price: p.price }, qty);
-        var btn = this;
-        var orig = btn.textContent;
-        btn.textContent = "Added ✓";
-        setTimeout(function () { btn.textContent = orig; }, 1100);
-      });
+    function clamp() {
+      var v = parseInt(input.value, 10);
+      if (isNaN(v) || v < 1) v = 1;
+      if (v > maxQty) v = maxQty;
+      input.value = v;
+      minus.disabled = v <= 1;
+      plus.disabled = v >= maxQty;
     }
+    minus.addEventListener("click", function () { input.value = (parseInt(input.value, 10) || 1) - 1; clamp(); });
+    plus.addEventListener("click", function () { input.value = (parseInt(input.value, 10) || 1) + 1; clamp(); });
+    input.addEventListener("input", clamp);
+    clamp();
+
+    addRow.querySelector("[data-add]").addEventListener("click", function () {
+      var qty = parseInt(input.value, 10) || 1;
+      var opt = options[selected];
+      var lineId = p.id + "__" + opt.id;
+      var lineName = p.name + " — " + opt.label;
+      if (EO) EO.cart.add({ id: lineId, name: lineName, price: opt.price }, qty);
+      var btn = this;
+      var orig = btn.textContent;
+      btn.textContent = "Added ✓";
+      setTimeout(function () { btn.textContent = orig; }, 1100);
+    });
 
     el.appendChild(addRow);
     return el;

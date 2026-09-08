@@ -1,61 +1,66 @@
 {
-  "_note": "PLACEHOLDER DATA — replace every value below with real cookie info before going live. See HOW-TO-UPDATE.md for plain-language instructions. Prices, quantities, ingredients and allergens shown here are examples only.",
+  "_note": "Real September pre-order menu (source: Emilee's Google Form). Prices are TBD for every item — fill in each option's \"price\" field (a number) once known; the site renders \"Price TBD\" automatically while it's null. Cranberry Orange Scones and the Variety Box's scone portion have allergensTBD:true — do NOT fill in guessed allergens; confirm with Emilee first.",
   "currency": "USD",
   "products": [
     {
-      "id": "brown-butter-choc-chip",
-      "name": "Brown Butter Chocolate Chip",
-      "price": 3.50,
-      "quantityAvailable": 12,
-      "isStaple": true,
-      "description": "PLACEHOLDER — the everyday staple. Crisp edges, a soft gooey center, browned butter for a deep toffee flavor.",
-      "ingredients": ["Flour (wheat)", "Butter", "Brown sugar", "Cane sugar", "Eggs", "Semisweet chocolate", "Vanilla", "Baking soda", "Salt"],
-      "allergens": ["Wheat", "Gluten", "Dairy", "Egg", "Soy"],
-      "imagePlaceholderLabel": "Brown Butter Choc Chip"
+      "id": "milk-choc-chip",
+      "name": "Milk Chocolate Chip Cookies",
+      "description": "Classic milk chocolate chip cookies, baked fresh to order.",
+      "imagePlaceholderLabel": "Milk Chocolate Chip Cookies",
+      "allergens": ["Dairy", "Eggs", "Wheat", "Soy"],
+      "allergensTBD": false,
+      "options": [
+        { "id": "6", "label": "Half dozen (6)", "count": 6, "price": null },
+        { "id": "12", "label": "Dozen (12)", "count": 12, "price": null }
+      ]
     },
     {
-      "id": "pumpkin-snickerdoodle",
-      "name": "Pumpkin Snickerdoodle",
-      "price": 4.00,
-      "quantityAvailable": 6,
-      "isStaple": false,
-      "description": "PLACEHOLDER — seasonal. Soft pumpkin-spiced cookie rolled in cinnamon sugar with a crackly top.",
-      "ingredients": ["Flour (wheat)", "Butter", "Pumpkin puree", "Cane sugar", "Egg", "Cinnamon", "Nutmeg", "Cream of tartar", "Baking soda", "Salt"],
-      "allergens": ["Wheat", "Gluten", "Dairy", "Egg"],
-      "imagePlaceholderLabel": "Pumpkin Snickerdoodle"
+      "id": "pumpkin-spice-cream-pies",
+      "name": "Pumpkin Spice Cream Pies",
+      "description": "Soft pumpkin spice cookies sandwiched around a cream filling.",
+      "imagePlaceholderLabel": "Pumpkin Spice Cream Pies",
+      "allergens": ["Dairy", "Eggs", "Wheat", "Soy"],
+      "allergensTBD": false,
+      "options": [
+        { "id": "4", "label": "4-pack (4)", "count": 4, "price": null },
+        { "id": "8", "label": "8-pack (8)", "count": 8, "price": null }
+      ]
     },
     {
-      "id": "maple-oat-pecan",
-      "name": "Maple Oat Pecan",
-      "price": 4.00,
-      "quantityAvailable": 8,
-      "isStaple": false,
-      "description": "PLACEHOLDER — seasonal. Chewy oat cookie with toasted pecans and real maple.",
-      "ingredients": ["Flour (wheat)", "Rolled oats", "Butter", "Maple syrup", "Brown sugar", "Egg", "Pecans", "Baking soda", "Salt"],
-      "allergens": ["Wheat", "Gluten", "Dairy", "Egg", "Tree nuts (pecan)"],
-      "imagePlaceholderLabel": "Maple Oat Pecan"
+      "id": "spiced-cinnamon-rolls",
+      "name": "Spiced Cinnamon Rolls",
+      "description": "Warm-spiced cinnamon rolls, baked to order.",
+      "imagePlaceholderLabel": "Spiced Cinnamon Rolls",
+      "allergens": ["Dairy", "Eggs", "Wheat"],
+      "allergensTBD": false,
+      "options": [
+        { "id": "4", "label": "4-pack (4)", "count": 4, "price": null },
+        { "id": "8", "label": "8-pack (8)", "count": 8, "price": null }
+      ]
     },
     {
-      "id": "double-chocolate",
-      "name": "Double Chocolate Fudge",
-      "price": 4.00,
-      "quantityAvailable": 0,
-      "isStaple": false,
-      "description": "PLACEHOLDER — seasonal. Rich cocoa dough loaded with dark and white chocolate chunks. (Shown here sold out to demonstrate the sold-out state.)",
-      "ingredients": ["Flour (wheat)", "Butter", "Cocoa", "Cane sugar", "Eggs", "Dark chocolate", "White chocolate", "Vanilla", "Baking soda", "Salt"],
-      "allergens": ["Wheat", "Gluten", "Dairy", "Egg", "Soy"],
-      "imagePlaceholderLabel": "Double Chocolate Fudge"
+      "id": "cranberry-orange-scones",
+      "name": "Cranberry Orange Scones",
+      "description": "Tender scones with cranberry and orange.",
+      "imagePlaceholderLabel": "Cranberry Orange Scones",
+      "allergens": [],
+      "allergensTBD": true,
+      "options": [
+        { "id": "4", "label": "4-pack (4)", "count": 4, "price": null },
+        { "id": "8", "label": "8-pack (8)", "count": 8, "price": null }
+      ]
     },
     {
-      "id": "lemon-shortbread",
-      "name": "Lemon Cornmeal Shortbread",
-      "price": 3.75,
-      "quantityAvailable": 10,
-      "isStaple": false,
-      "description": "PLACEHOLDER — seasonal. Buttery shortbread with bright lemon zest and a delicate cornmeal crunch. Nut-free.",
-      "ingredients": ["Flour (wheat)", "Cornmeal", "Butter", "Powdered sugar", "Lemon zest", "Vanilla", "Salt"],
-      "allergens": ["Wheat", "Gluten", "Dairy"],
-      "imagePlaceholderLabel": "Lemon Cornmeal Shortbread"
+      "id": "variety-box",
+      "name": "Variety Box",
+      "description": "A taste of the whole September menu: 3 milk chocolate chip cookies, 3 pumpkin spice cream pies, 2 spiced cinnamon rolls, and 2 cranberry orange scones.",
+      "imagePlaceholderLabel": "Variety Box",
+      "allergens": ["Dairy", "Eggs", "Wheat", "Soy"],
+      "allergensTBD": true,
+      "allergensNote": "Includes scones — scone allergens TBD, check with baker.",
+      "options": [
+        { "id": "box", "label": "Variety Box (single box)", "count": 1, "price": null }
+      ]
     }
   ]
 }

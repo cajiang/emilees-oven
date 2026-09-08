@@ -12,11 +12,12 @@
 
   var CART_KEY = "emileesoven.cart.v1";
 
-  /* ----- placeholder handles the owner must replace (see HOW-TO-UPDATE.md) ----- */
+  /* ----- real payment + contact handles ----- */
   var PAYMENT = {
-    zelle: "PLACEHOLDER-zelle@example.com",   // TODO(owner): replace with real Zelle email/phone
-    venmo: "@PLACEHOLDER-Emilees-Oven",        // TODO(owner): replace with real Venmo handle
-    notifyEmail: "hello@example.com"           // TODO(owner): where a reservation email should go (fallback mailto)
+    venmo: "@emileegroff",
+    paypal: "@emilee1264",
+    cash: "exact cash only (can not break bills at this time)",
+    notifyEmail: "emileesoven@gmail.com"       // where a reservation email should go (fallback mailto)
   };
 
   /* =========================================================
@@ -44,13 +45,17 @@
     }
 
     var itemLines = payload.items.map(function (it) {
-      return "  - " + it.name + " x " + it.qty + " (" + money(it.lineTotal) + ")";
+      return "  - " + it.name + " x " + it.qty + " (" +
+        (typeof it.lineTotal === "number" ? money(it.lineTotal) : "Price TBD") + ")";
     }).join("\n");
+    var totalLine = typeof payload.total === "number"
+      ? money(payload.total) + " " + payload.currency
+      : "Price TBD (confirm with baker)";
 
     var message =
       "New cookie reservation " + payload.reservationId + "\n\n" +
       itemLines +
-      "\n\nTotal: " + money(payload.total) + " " + payload.currency +
+      "\n\nTotal: " + totalLine +
       "\n\nCustomer: " + payload.customer.name +
       "\nEmail: " + (payload.customer.email || "-") +
       "\nPhone: " + (payload.customer.phone || "-") +
@@ -107,8 +112,21 @@
   function cartCount() {
     return readCart().reduce(function (n, it) { return n + it.qty; }, 0);
   }
+  function cartHasTBD() {
+    return readCart().some(function (it) { return it.price === null || it.price === undefined; });
+  }
   function cartTotal() {
-    return readCart().reduce(function (s, it) { return s + it.qty * it.price; }, 0);
+    // Sums only priced lines. When any line is Price TBD, use cartTotalLabel()
+    // for display instead of this raw number.
+    return readCart().reduce(function (s, it) {
+      return s + it.qty * (typeof it.price === "number" ? it.price : 0);
+    }, 0);
+  }
+  function cartTotalLabel() {
+    return cartHasTBD() ? "Price TBD" : money(cartTotal());
+  }
+  function lineTotalLabel(it) {
+    return typeof it.price === "number" ? money(it.qty * it.price) : "Price TBD";
   }
 
   /* add / set quantity for a product line.
@@ -137,7 +155,8 @@
 
   window.EmileesOven.cart = {
     read: readCart, add: addToCart, setLineQty: setLineQty,
-    clear: clearCart, count: cartCount, total: cartTotal
+    clear: clearCart, count: cartCount, total: cartTotal,
+    totalLabel: cartTotalLabel, hasTBD: cartHasTBD, lineTotalLabel: lineTotalLabel
   };
 
   /* ================= money helper ================= */
@@ -161,7 +180,7 @@
         summary.innerHTML = count === 0
           ? "No items selected yet."
           : "<strong>" + count + "</strong> item" + (count === 1 ? "" : "s") +
-            " selected · " + money(cartTotal());
+            " selected · " + cartTotalLabel();
       }
       tray.classList.toggle("open", count > 0);
       var btn = tray.querySelector("[data-open-reserve]");
@@ -194,7 +213,7 @@
 
     var lines = cart.map(function (it) {
       return '<li><span>' + escapeHtml(it.name) + ' &times; ' + it.qty +
-             '</span><span>' + money(it.qty * it.price) + '</span></li>';
+             '</span><span>' + lineTotalLabel(it) + '</span></li>';
     }).join("");
 
     body.innerHTML =
@@ -202,7 +221,7 @@
       '<h2>Reserve your cookies</h2>' +
       '<p class="modal-sub">Emilee bakes limited batches. Reserving lets her set your cookies aside — you’ll arrange pickup &amp; payment with her directly.</p>' +
       '<ul class="order-lines">' + lines +
-        '<li class="order-total"><span>Total</span><span>' + money(cartTotal()) + '</span></li>' +
+        '<li class="order-total"><span>Total</span><span>' + cartTotalLabel() + '</span></li>' +
       '</ul>' +
       '<form id="reserve-form" novalidate>' +
         '<div class="field">' +
@@ -253,16 +272,18 @@
 
     var cart = readCart();
     var items = cart.map(function (it) {
+      var priced = typeof it.price === "number";
       return { id: it.id, name: it.name, qty: it.qty, price: it.price,
-               lineTotal: +(it.qty * it.price).toFixed(2) };
+               lineTotal: priced ? +(it.qty * it.price).toFixed(2) : null };
     });
+    var hasTBD = cartHasTBD();
 
     var payload = {
       reservationId: "EO-" + Date.now().toString(36).toUpperCase(),
       createdAt: new Date().toISOString(),
       customer: { name: name, email: email, phone: phone, note: note },
       items: items,
-      total: +cartTotal().toFixed(2),
+      total: hasTBD ? null : +cartTotal().toFixed(2),
       currency: "USD"
     };
 
@@ -280,10 +301,11 @@
 
     var lines = payload.items.map(function (it) {
       return '<li><span>' + escapeHtml(it.name) + ' &times; ' + it.qty +
-             '</span><span>' + money(it.lineTotal) + '</span></li>';
+             '</span><span>' + (typeof it.lineTotal === "number" ? money(it.lineTotal) : "Price TBD") + '</span></li>';
     }).join("");
 
     var mailto = buildMailto(payload);
+    var totalLabel = typeof payload.total === "number" ? money(payload.total) : "Price TBD";
 
     body.innerHTML =
       '<button class="modal-close" type="button" data-close aria-label="Close">&times;</button>' +
@@ -292,15 +314,17 @@
       '<p class="modal-sub" style="text-align:center;">Reservation ' + escapeHtml(payload.reservationId) +
         ' for <strong>' + escapeHtml(payload.customer.name) + '</strong></p>' +
       '<ul class="order-lines">' + lines +
-        '<li class="order-total"><span>Total</span><span>' + money(payload.total) + '</span></li>' +
+        '<li class="order-total"><span>Total</span><span>' + totalLabel + '</span></li>' +
       '</ul>' +
+      (payload.total === null
+        ? '<p class="mock-flag" style="margin:-10px 0 14px;">Pricing isn’t set yet — Emilee will confirm the price when she confirms your batch.</p>'
+        : '') +
       '<div class="pay-box">' +
-        '<span class="wip">Work in progress</span>' +
         '<h3>How payment will work</h3>' +
-        '<p style="margin:0 0 8px;">Payment is arranged with Emilee directly — nothing is charged here. Once these handles are set, you’ll send payment after she confirms your batch:</p>' +
-        '<p style="margin:0;">Zelle: <code>' + escapeHtml(PAYMENT.zelle) + '</code><br>' +
-        'Venmo: <code>' + escapeHtml(PAYMENT.venmo) + '</code></p>' +
-        '<p style="margin:8px 0 0;font-size:12px;">(Placeholder handles — the bakery will replace these before launch.)</p>' +
+        '<p style="margin:0 0 8px;">Payment is due at delivery. Tips are appreciated, not required.</p>' +
+        '<p style="margin:0;">Venmo: <code>' + escapeHtml(PAYMENT.venmo) + '</code><br>' +
+        'PayPal: <code>' + escapeHtml(PAYMENT.paypal) + '</code><br>' +
+        'Cash: ' + escapeHtml(PAYMENT.cash) + '</p>' +
       '</div>' +
       '<p style="font-size:14px;color:var(--ink-soft);">' +
         (degraded ? "We couldn’t reach the notification service, so " : "This v1 site doesn’t send messages automatically yet, so ") +
@@ -314,11 +338,13 @@
 
   function buildMailto(payload) {
     var lines = payload.items.map(function (it) {
-      return "  - " + it.name + " x " + it.qty + " (" + money(it.lineTotal) + ")";
+      return "  - " + it.name + " x " + it.qty + " (" +
+        (typeof it.lineTotal === "number" ? money(it.lineTotal) : "Price TBD") + ")";
     }).join("\n");
+    var totalLine = typeof payload.total === "number" ? money(payload.total) : "Price TBD (Emilee will confirm)";
     var body =
       "Hi Emilee, I'd like to reserve:\n\n" + lines +
-      "\n\nTotal: " + money(payload.total) +
+      "\n\nTotal: " + totalLine +
       "\n\nName: " + payload.customer.name +
       "\nEmail: " + (payload.customer.email || "-") +
       "\nPhone: " + (payload.customer.phone || "-") +

@@ -194,7 +194,7 @@
       var qty = parseInt(input.value, 10) || 1;
       var opt = options[selected];
       var lineId = p.id + "__" + opt.id;
-      var lineName = p.name + " — " + opt.label;
+      var lineName = options.length > 1 ? (p.name + " — " + opt.label) : p.name;
       if (EO) EO.cart.add({ id: lineId, name: lineName, price: opt.price }, qty);
       var btn = this;
       var orig = btn.textContent;

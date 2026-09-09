@@ -32,7 +32,7 @@
 <main id="main">
   <div class="wrap section">
     <div class="placeholder-banner">
-      <strong>Preview</strong> — email and payment info below are real. Phone/text and Instagram are not set up yet (TBD).
+      <strong>Preview</strong> — payment info below is real. Phone/text and Instagram are not set up yet (TBD).
     </div>
 
     <section class="hero" style="margin-bottom:30px;">
@@ -46,7 +46,7 @@
         <h2 class="script">Reach the bakery</h2>
         <p class="section-sub">The best ways to get in touch</p>
 
-        <p class="contact-line"><strong>Email</strong> <a href="mailto:emileesoven@gmail.com">emileesoven@gmail.com</a></p>
+        <p class="contact-line">Questions? Use the message form → it reaches us directly.</p>
         <p class="contact-line"><strong>Phone / Text</strong> TBD</p>
         <p class="contact-line"><strong>Instagram</strong> TBD</p>
         <p class="contact-line"><strong>Pickup area</strong> [Your neighborhood / city — placeholder]</p>
@@ -71,9 +71,9 @@
             <div class="field-error" data-err="name" hidden>Please enter your name.</div>
           </div>
           <div class="field">
-            <label for="cf-email">Email <span class="req">*</span></label>
-            <input id="cf-email" name="email" type="email" autocomplete="email" inputmode="email" required>
-            <div class="field-error" data-err="email" hidden>Please enter a valid email.</div>
+            <label for="cf-email">Email <span class="hint">(optional)</span></label>
+            <input id="cf-email" name="email" type="email" autocomplete="email" inputmode="email">
+            <div class="field-error" data-err="email" hidden>Please enter a valid email, or leave it blank.</div>
           </div>
           <div class="field">
             <label for="cf-message">Message <span class="req">*</span></label>
@@ -81,13 +81,13 @@
             <div class="field-error" data-err="message" hidden>Please write a short message.</div>
           </div>
           <button class="btn" type="submit">Send message</button>
-          <p class="mock-flag">This form is a placeholder — it doesn’t send anything yet. To reserve cookies, use the <a href="products.html">Products</a> page.</p>
+          <div class="field-error" data-err="submit" hidden>Couldn’t send your message — please try again in a moment.</div>
+          <p class="mock-flag">Not a reservation — to reserve cookies, use the <a href="products.html">Products</a> page.</p>
         </form>
 
         <div id="contact-done" class="pay-box" hidden style="background:var(--paper-2);border-color:var(--olive);color:var(--burnt-umber);">
-          <h3 style="margin:0 0 6px;">Thanks! (demo only)</h3>
-          <p style="margin:0;">This is a preview, so your message wasn’t actually sent. For now, please email
-          <a href="mailto:emileesoven@gmail.com">emileesoven@gmail.com</a>.</p>
+          <h3 style="margin:0 0 6px;">Thanks!</h3>
+          <p style="margin:0;">Your message has been sent to Emilee. She reads every message and will get back to you.</p>
         </div>
       </div>
     </div>
@@ -104,8 +104,9 @@
 
 <script src="app.js"></script>
 <script>
-  /* Contact form is a local placeholder only — no submission wired.
-     (Reservations, not this form, go through submitReservation() in app.js.) */
+  /* Contact form posts to the same Google Apps Script Web App as
+     reservations (type:"message"), via window.EmileesOven.submitMessage()
+     in app.js. Email-free: no baker email is shown or required. */
   (function () {
     var form = document.getElementById("contact-form");
     if (!form) return;
@@ -119,13 +120,27 @@
       var name = form.name.value.trim();
       var email = form.email.value.trim();
       var message = form.message.value.trim();
-      var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      var emailOk = !email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
       mark("name", !name); if (!name) ok = false;
       mark("email", !emailOk); if (!emailOk) ok = false;
       mark("message", !message); if (!message) ok = false;
+      mark("submit", false);
       if (!ok) return;
-      form.hidden = true;
-      document.getElementById("contact-done").hidden = false;
+
+      var submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.disabled = true; submitBtn.textContent = "Sending...";
+
+      Promise.resolve(window.EmileesOven && window.EmileesOven.submitMessage
+        ? window.EmileesOven.submitMessage({ name: name, email: email, message: message })
+        : Promise.reject({ ok: false, mode: "unavailable" }))
+        .then(function () {
+          form.hidden = true;
+          document.getElementById("contact-done").hidden = false;
+        })
+        .catch(function () {
+          submitBtn.disabled = false; submitBtn.textContent = "Send message";
+          mark("submit", true);
+        });
     });
   })();
 </script>

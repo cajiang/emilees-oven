@@ -4,97 +4,90 @@
    reservation form modal, confirmation, and the SINGLE
    swappable submission integration point.
 
-   No frameworks. No network calls except optional mailto.
-   Nothing is transmitted to any server in v1.
+   Orders + contact messages are POSTed to a Google Apps Script
+   Web App (which appends a row to a Google Sheet). No email is
+   used anywhere in this flow.
    ============================================================ */
 (function () {
   "use strict";
 
   var CART_KEY = "emileesoven.cart.v1";
 
-  /* ----- real payment + contact handles ----- */
+  /* ----- real payment handles (no email) ----- */
   var PAYMENT = {
     venmo: "@emileegroff",
     paypal: "@emilee1264",
-    cash: "exact cash only (can not break bills at this time)",
-    notifyEmail: "emileesoven@gmail.com"       // where a reservation email should go (fallback mailto)
+    cash: "exact cash only (can not break bills at this time)"
   };
 
   /* =========================================================
      ONE swappable integration point.
-     Everything that "submits" a reservation goes through here.
-     To wire a real backend later (Airtable / Notion / email /
-     serverless function), replace the body of this function.
-     The rest of the site does not need to change.
+     Everything that "submits" an order or a contact message
+     goes through submitToSheet(). Point GOOGLE_SCRIPT_URL at a
+     deployed Apps Script Web App (see orders-apps-script.gs +
+     ORDER-INTAKE-SETUP.md) and both flows work with no other
+     code changes.
      ========================================================= */
-  function submitReservation(payload) {
-    // Sends the reservation to the baker's email via Web3Forms (free, no
-    // backend needed). Until a real access key is set below, this rejects
-    // on purpose so the caller falls back to the local confirmation +
-    // mailto path — nothing is transmitted anywhere pre-key.
-    //
-    //   { reservationId, createdAt, customer:{name,email,phone,note}, items:[{id,name,qty,price,lineTotal}], total, currency }
+  var GOOGLE_SCRIPT_URL = "PLACEHOLDER-apps-script-url"; // SWAP: your deployed Apps Script /exec URL
+  var FORM_TOKEN = "emilees-oven-orders"; // light spam guard, checked (optionally) by the Apps Script
 
-    var WEB3FORMS_ACCESS_KEY = "PLACEHOLDER-web3forms-access-key"; // SWAP: get a free key at web3forms.com (tied to the baker's email)
-
-    if (!WEB3FORMS_ACCESS_KEY || WEB3FORMS_ACCESS_KEY.indexOf("PLACEHOLDER") === 0) {
+  // Low-level POST to the Apps Script Web App.
+  // Apps Script Web Apps don't do a CORS preflight and don't expose a
+  // readable CORS response to the page, so this uses a CORS-safe "simple
+  // request" (text/plain body, no custom headers that would trigger a
+  // preflight) and treats a resolved fetch (no thrown network error) as
+  // success — the response body itself is not read.
+  function submitToSheet(body) {
+    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.indexOf("PLACEHOLDER") === 0) {
       try {
-        console.info("[Emilees Oven] submitReservation() — placeholder Web3Forms key, using local fallback. Payload:", payload);
+        console.info("[Emilees Oven] submitToSheet() — placeholder Apps Script URL, not sending. Payload:", body);
       } catch (e) {}
-      return Promise.reject({ ok: false, mode: "placeholder-key", payload: payload });
+      return Promise.reject({ ok: false, mode: "placeholder-url", payload: body });
     }
 
-    var itemLines = payload.items.map(function (it) {
-      return "  - " + it.name + " x " + it.qty + " (" +
-        (typeof it.lineTotal === "number" ? money(it.lineTotal) : "Price TBD") + ")";
-    }).join("\n");
-    var totalLine = typeof payload.total === "number"
-      ? money(payload.total) + " " + payload.currency
-      : "Price TBD (confirm with baker)";
-
-    var message =
-      "New cookie reservation " + payload.reservationId + "\n\n" +
-      itemLines +
-      "\n\nTotal: " + totalLine +
-      "\n\nCustomer: " + payload.customer.name +
-      "\nEmail: " + (payload.customer.email || "-") +
-      "\nPhone: " + (payload.customer.phone || "-") +
-      "\nNote: " + (payload.customer.note || "-") +
-      "\n\nReservation ref: " + payload.reservationId +
-      "\nSubmitted: " + payload.createdAt;
-
-    var body = {
-      access_key: WEB3FORMS_ACCESS_KEY,
-      subject: "New cookie reservation " + payload.reservationId,
-      from_name: "Emilees Oven website",
-      name: payload.customer.name,
-      email: payload.customer.email || "not provided",
-      phone: payload.customer.phone || "not provided",
-      message: message
-    };
-
-    return fetch("https://api.web3forms.com/submit", {
+    return fetch(GOOGLE_SCRIPT_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify(body)
-    }).then(function (r) {
-      return r.json().then(function (data) {
-        if (!r.ok || !data || data.success === false) {
-          throw new Error("Web3Forms submission failed");
-        }
-        return { ok: true, mode: "web3forms", payload: payload };
-      });
+    }).then(function () {
+      return { ok: true, mode: "sheet", payload: body };
     }).catch(function (err) {
       try {
-        console.warn("[Emilees Oven] submitReservation() — Web3Forms send failed, using local fallback.", err);
+        console.warn("[Emilees Oven] submitToSheet() — send failed.", err);
       } catch (e) {}
-      throw { ok: false, mode: "network-error", payload: payload };
+      throw { ok: false, mode: "network-error", payload: body };
+    });
+  }
+
+  // { reservationId, createdAt, customer:{name,email,phone,note}, items:[{id,name,qty,price,lineTotal}], total, currency }
+  function submitReservation(payload) {
+    return submitToSheet({
+      type: "order",
+      token: FORM_TOKEN,
+      reservationId: payload.reservationId,
+      createdAt: payload.createdAt,
+      customer: payload.customer,
+      items: payload.items,
+      total: payload.total,
+      currency: payload.currency
+    });
+  }
+
+  // { name, email (optional), message }
+  function submitContactMessage(payload) {
+    return submitToSheet({
+      type: "message",
+      token: FORM_TOKEN,
+      createdAt: new Date().toISOString(),
+      customer: { name: payload.name, email: payload.email || "" },
+      message: payload.message
     });
   }
 
   /* ----- expose for manual testing / future wiring ----- */
   window.EmileesOven = window.EmileesOven || {};
   window.EmileesOven.submitReservation = submitReservation;
+  window.EmileesOven.submitMessage = submitContactMessage;
 
   /* ================= cart storage ================= */
   function readCart() {
@@ -247,7 +240,7 @@
           '<button class="btn" type="submit">Send reservation</button>' +
           '<button class="btn btn-secondary" type="button" data-close>Keep browsing</button>' +
         '</div>' +
-        '<p class="mock-flag">Nothing is charged now. This v1 site does not send data anywhere yet — see the confirmation for details.</p>' +
+        '<p class="mock-flag">Nothing is charged now. Emilee will confirm availability and arrange payment with you directly.</p>' +
       '</form>';
 
     body.querySelector("#reserve-form").addEventListener("submit", onReserveSubmit);
@@ -292,10 +285,10 @@
 
     Promise.resolve(submitReservation(payload))
       .then(function () { showConfirmation(payload); clearCart(); })
-      .catch(function () { showConfirmation(payload, true); clearCart(); });
+      .catch(function () { showSubmitError(payload); });
   }
 
-  function showConfirmation(payload, degraded) {
+  function showConfirmation(payload) {
     var m = getModal(); if (!m) return;
     var body = m.querySelector("[data-modal-body]");
 
@@ -304,13 +297,12 @@
              '</span><span>' + (typeof it.lineTotal === "number" ? money(it.lineTotal) : "Price TBD") + '</span></li>';
     }).join("");
 
-    var mailto = buildMailto(payload);
     var totalLabel = typeof payload.total === "number" ? money(payload.total) : "Price TBD";
 
     body.innerHTML =
       '<button class="modal-close" type="button" data-close aria-label="Close">&times;</button>' +
       '<div class="confirm-check" aria-hidden="true">🍪</div>' +
-      '<h2 style="text-align:center;">Reservation ready!</h2>' +
+      '<h2 style="text-align:center;">Reservation sent!</h2>' +
       '<p class="modal-sub" style="text-align:center;">Reservation ' + escapeHtml(payload.reservationId) +
         ' for <strong>' + escapeHtml(payload.customer.name) + '</strong></p>' +
       '<ul class="order-lines">' + lines +
@@ -326,33 +318,23 @@
         'PayPal: <code>' + escapeHtml(PAYMENT.paypal) + '</code><br>' +
         'Cash: ' + escapeHtml(PAYMENT.cash) + '</p>' +
       '</div>' +
-      '<p style="font-size:14px;color:var(--ink-soft);">' +
-        (degraded ? "We couldn’t reach the notification service, so " : "This v1 site doesn’t send messages automatically yet, so ") +
-        'please confirm your reservation with Emilee. You can send the details as an email:</p>' +
+      '<p style="font-size:14px;color:var(--ink-soft);">Emilee has your reservation and will confirm availability with you directly.</p>' +
       '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
-        '<a class="btn" href="' + mailto + '">Email these details</a>' +
-        '<button class="btn btn-secondary" type="button" data-close>Done</button>' +
-      '</div>' +
-      '<p class="mock-flag">Developer note: reservation captured locally only. See <code>submitReservation()</code> in app.js to wire a real backend/notification.</p>';
+        '<button class="btn" type="button" data-close>Done</button>' +
+      '</div>';
   }
 
-  function buildMailto(payload) {
-    var lines = payload.items.map(function (it) {
-      return "  - " + it.name + " x " + it.qty + " (" +
-        (typeof it.lineTotal === "number" ? money(it.lineTotal) : "Price TBD") + ")";
-    }).join("\n");
-    var totalLine = typeof payload.total === "number" ? money(payload.total) : "Price TBD (Emilee will confirm)";
-    var body =
-      "Hi Emilee, I'd like to reserve:\n\n" + lines +
-      "\n\nTotal: " + totalLine +
-      "\n\nName: " + payload.customer.name +
-      "\nEmail: " + (payload.customer.email || "-") +
-      "\nPhone: " + (payload.customer.phone || "-") +
-      "\nNote: " + (payload.customer.note || "-") +
-      "\n\nReservation ref: " + payload.reservationId;
-    return "mailto:" + encodeURIComponent(PAYMENT.notifyEmail) +
-      "?subject=" + encodeURIComponent("Cookie reservation " + payload.reservationId) +
-      "&body=" + encodeURIComponent(body);
+  function showSubmitError(payload) {
+    var m = getModal(); if (!m) return;
+    var body = m.querySelector("[data-modal-body]");
+
+    body.innerHTML =
+      '<button class="modal-close" type="button" data-close aria-label="Close">&times;</button>' +
+      '<h2>Couldn’t submit reservation</h2>' +
+      '<p class="modal-sub">Something went wrong sending your reservation. Please check your connection and try again — your items are still saved.</p>' +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">' +
+        '<button class="btn" type="button" data-close>Try again</button>' +
+      '</div>';
   }
 
   function escapeHtml(s) {

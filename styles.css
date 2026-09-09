@@ -242,6 +242,15 @@ h2.script::after{
 .product-photo .photo-tag{
   position:relative;
 }
+/* Real photo variant: an <img class="product-photo"> replaces the CSS
+   placeholder div above. Same box (height/border-bottom, and rounded top
+   corners via the card's overflow:hidden) — just fill it with the photo. */
+img.product-photo{
+  width:100%;
+  padding:0;
+  object-fit:cover;
+  display:block;
+}
 .product-body{padding:20px;display:flex;flex-direction:column;gap:10px;flex:1;}
 .product-name{font-size:19px;font-weight:600;color:var(--ink);margin:0;}
 .product-price-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;}

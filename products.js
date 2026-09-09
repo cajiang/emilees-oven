@@ -32,6 +32,12 @@
     });
   }
 
+  // Descriptive alt text for products that have a real photo (keyed by product id).
+  var PHOTO_ALT = {
+    "cranberry-orange-scones": "Cranberry orange scones on a wooden board",
+    "pumpkin-spice-cream-pies": "Pumpkin spice oatmeal cream pies stacked on a board"
+  };
+
   function notice(html) {
     mount.innerHTML =
       '<div class="card" style="grid-column:1/-1;">' + html + '</div>';
@@ -92,6 +98,17 @@
       : '<div class="allergen-none">No allergens listed — always confirm with Emilee if you have a serious allergy.</div>';
   }
 
+  function photoBlock(p) {
+    if (p.image) {
+      var alt = PHOTO_ALT[p.id] || (p.name + " photo");
+      return '<img class="product-photo" src="' + escapeHtml(p.image) + '" alt="' + escapeHtml(alt) + '" loading="lazy">';
+    }
+    return '<div class="product-photo" role="img" aria-label="Placeholder photo of ' +
+        escapeHtml(p.name) + ' (real photo coming soon)">' +
+        '<span class="photo-tag">' + escapeHtml(p.imagePlaceholderLabel || p.name) + '<br><small style="font-family:var(--font-body);font-size:11px;letter-spacing:.05em;">photo coming soon</small></span>' +
+      '</div>';
+  }
+
   function card(p) {
     var options = Array.isArray(p.options) && p.options.length ? p.options : [{ id: "default", label: p.name, count: 1, price: null }];
     var selected = 0;
@@ -100,10 +117,7 @@
     el.className = "card product-card";
 
     el.innerHTML =
-      '<div class="product-photo" role="img" aria-label="Placeholder photo of ' +
-        escapeHtml(p.name) + ' (real photo coming soon)">' +
-        '<span class="photo-tag">' + escapeHtml(p.imagePlaceholderLabel || p.name) + '<br><small style="font-family:var(--font-body);font-size:11px;letter-spacing:.05em;">photo coming soon</small></span>' +
-      '</div>' +
+      photoBlock(p) +
       '<div class="product-body">' +
         '<h3 class="product-name">' + escapeHtml(p.name) + '</h3>' +
         '<div class="pack-selector" data-pack-selector role="group" aria-label="Pack size for ' + escapeHtml(p.name) + '"></div>' +

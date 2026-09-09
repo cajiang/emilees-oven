@@ -1,5 +1,5 @@
 {
-  "_note": "Real September pre-order menu (source: Emilee's Google Form). Prices are TBD for every item — fill in each option's \"price\" field (a number) once known; the site renders \"Price TBD\" automatically while it's null. Cranberry Orange Scones and the Variety Box's scone portion have allergensTBD:true — do NOT fill in guessed allergens; confirm with Emilee first.",
+  "_note": "Real September pre-order menu (source: Emilee's Google Form). Prices are set (USD). Cranberry Orange Scones and the Variety Box's scone portion have allergensTBD:true — do NOT fill in guessed allergens; confirm with Emilee first.",
   "currency": "USD",
   "products": [
     {
@@ -7,11 +7,12 @@
       "name": "Milk Chocolate Chip Cookies",
       "description": "Classic milk chocolate chip cookies, baked fresh to order.",
       "imagePlaceholderLabel": "Milk Chocolate Chip Cookies",
+      "image": "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?q=80&w=2400&auto=format&fit=crop",
       "allergens": ["Dairy", "Eggs", "Wheat", "Soy"],
       "allergensTBD": false,
       "options": [
-        { "id": "6", "label": "Half dozen (6)", "count": 6, "price": null },
-        { "id": "12", "label": "Dozen (12)", "count": 12, "price": null }
+        { "id": "6", "label": "Half dozen (6)", "count": 6, "price": 12 },
+        { "id": "12", "label": "Dozen (12)", "count": 12, "price": 20 }
       ]
     },
     {
@@ -19,11 +20,12 @@
       "name": "Pumpkin Spice Cream Pies",
       "description": "Soft pumpkin spice cookies sandwiched around a cream filling.",
       "imagePlaceholderLabel": "Pumpkin Spice Cream Pies",
+      "image": "images/pumpkin-spice-cream-pies.jpg",
       "allergens": ["Dairy", "Eggs", "Wheat", "Soy"],
       "allergensTBD": false,
       "options": [
-        { "id": "4", "label": "4-pack (4)", "count": 4, "price": null },
-        { "id": "8", "label": "8-pack (8)", "count": 8, "price": null }
+        { "id": "4", "label": "4-pack (4)", "count": 4, "price": 15 },
+        { "id": "8", "label": "8-pack (8)", "count": 8, "price": 25 }
       ]
     },
     {
@@ -34,8 +36,8 @@
       "allergens": ["Dairy", "Eggs", "Wheat"],
       "allergensTBD": false,
       "options": [
-        { "id": "4", "label": "4-pack (4)", "count": 4, "price": null },
-        { "id": "8", "label": "8-pack (8)", "count": 8, "price": null }
+        { "id": "4", "label": "4-pack (4)", "count": 4, "price": 15 },
+        { "id": "8", "label": "8-pack (8)", "count": 8, "price": 25 }
       ]
     },
     {
@@ -43,11 +45,12 @@
       "name": "Cranberry Orange Scones",
       "description": "Tender scones with cranberry and orange.",
       "imagePlaceholderLabel": "Cranberry Orange Scones",
+      "image": "images/cranberry-orange-scones.jpg",
       "allergens": [],
       "allergensTBD": true,
       "options": [
-        { "id": "4", "label": "4-pack (4)", "count": 4, "price": null },
-        { "id": "8", "label": "8-pack (8)", "count": 8, "price": null }
+        { "id": "4", "label": "4-pack (4)", "count": 4, "price": 15 },
+        { "id": "8", "label": "8-pack (8)", "count": 8, "price": 25 }
       ]
     },
     {
@@ -59,7 +62,7 @@
       "allergensTBD": true,
       "allergensNote": "Includes scones — scone allergens TBD, check with baker.",
       "options": [
-        { "id": "box", "label": "Variety Box (single box)", "count": 1, "price": null }
+        { "id": "box", "label": "Variety Box (single box)", "count": 1, "price": 30 }
       ]
     }
   ]

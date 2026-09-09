@@ -205,8 +205,23 @@
     if (cart.length === 0) { closeModal(); return; }
 
     var lines = cart.map(function (it) {
-      return '<li><span>' + escapeHtml(it.name) + ' &times; ' + it.qty +
-             '</span><span>' + lineTotalLabel(it) + '</span></li>';
+      var idAttr = escapeHtml(String(it.id));
+      var nameAttr = escapeHtml(it.name);
+      return '<li class="order-line" data-line-id="' + idAttr + '">' +
+        '<span class="line-name">' + nameAttr + '</span>' +
+        '<span class="line-actions">' +
+          '<span class="line-stepper" role="group" aria-label="Quantity for ' + nameAttr + '">' +
+            '<button type="button" class="line-step-btn" data-action="dec" data-id="' + idAttr +
+              '" aria-label="Decrease quantity of ' + nameAttr + '">&minus;</button>' +
+            '<span class="line-qty">' + it.qty + '</span>' +
+            '<button type="button" class="line-step-btn" data-action="inc" data-id="' + idAttr +
+              '" aria-label="Increase quantity of ' + nameAttr + '">+</button>' +
+          '</span>' +
+          '<span class="line-total">' + lineTotalLabel(it) + '</span>' +
+          '<button type="button" class="line-remove" data-action="remove" data-id="' + idAttr +
+            '" aria-label="Remove ' + nameAttr + '">&times;</button>' +
+        '</span>' +
+      '</li>';
     }).join("");
 
     body.innerHTML =
@@ -244,6 +259,39 @@
       '</form>';
 
     body.querySelector("#reserve-form").addEventListener("submit", onReserveSubmit);
+    wireOrderLineControls(body);
+  }
+
+  /* remove / stepper controls inside the modal's order-lines list.
+     Delegated on the list so a single listener covers every line;
+     each click mutates the cart then re-renders the whole modal
+     (list + total + nav/tray via writeCart -> renderCartUI), and
+     renderReservationForm() itself closes the modal if the cart
+     ends up empty. */
+  function wireOrderLineControls(body) {
+    var linesEl = body.querySelector(".order-lines");
+    if (!linesEl) return;
+    linesEl.addEventListener("click", function (e) {
+      var btn = e.target.closest ? e.target.closest("[data-action][data-id]") : null;
+      if (!btn) return;
+      var id = btn.getAttribute("data-id");
+      var cart = readCart();
+      var line = cart.filter(function (c) { return String(c.id) === id; })[0];
+      if (!line) return;
+
+      var action = btn.getAttribute("data-action");
+      var item = { id: line.id, name: line.name, price: line.price };
+      if (action === "remove") {
+        setLineQty(item, 0);
+      } else if (action === "inc") {
+        setLineQty(item, line.qty + 1);
+      } else if (action === "dec") {
+        setLineQty(item, line.qty - 1); // qty 0 removes the line (setLineQty handles this)
+      } else {
+        return;
+      }
+      renderReservationForm(); // re-render: list + total update, or modal closes if now empty
+    });
   }
 
   function onReserveSubmit(e) {

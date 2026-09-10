@@ -12,6 +12,7 @@
   "use strict";
 
   var CART_KEY = "emileesoven.cart.v1";
+  var MAX_ITEMS = 2; // max total packs (sum of all line quantities) per reservation
 
   /* ----- real payment handles (no email) ----- */
   var PAYMENT = {
@@ -88,6 +89,7 @@
   window.EmileesOven = window.EmileesOven || {};
   window.EmileesOven.submitReservation = submitReservation;
   window.EmileesOven.submitMessage = submitContactMessage;
+  window.EmileesOven.MAX_ITEMS = MAX_ITEMS; // single source of truth, read by products.js too
 
   /* ================= cart storage ================= */
   function readCart() {
@@ -204,6 +206,7 @@
     var cart = readCart();
     if (cart.length === 0) { closeModal(); return; }
 
+    var atLimit = cartCount() >= MAX_ITEMS;
     var lines = cart.map(function (it) {
       var idAttr = escapeHtml(String(it.id));
       var nameAttr = escapeHtml(it.name);
@@ -214,8 +217,9 @@
             '<button type="button" class="line-step-btn" data-action="dec" data-id="' + idAttr +
               '" aria-label="Decrease quantity of ' + nameAttr + '">&minus;</button>' +
             '<span class="line-qty">' + it.qty + '</span>' +
-            '<button type="button" class="line-step-btn" data-action="inc" data-id="' + idAttr +
-              '" aria-label="Increase quantity of ' + nameAttr + '">+</button>' +
+            '<button type="button" class="line-step-btn" data-action="inc" data-id="' + idAttr + '"' +
+              (atLimit ? ' disabled aria-disabled="true"' : '') +
+              ' aria-label="Increase quantity of ' + nameAttr + '">+</button>' +
           '</span>' +
           '<span class="line-total">' + lineTotalLabel(it) + '</span>' +
           '<button type="button" class="line-remove" data-action="remove" data-id="' + idAttr +
@@ -231,6 +235,7 @@
       '<ul class="order-lines">' + lines +
         '<li class="order-total"><span>Total</span><span>' + cartTotalLabel() + '</span></li>' +
       '</ul>' +
+      '<p class="limit-msg" data-limit-msg hidden>You can reserve up to 2 items per order.</p>' +
       '<form id="reserve-form" novalidate>' +
         '<div class="field">' +
           '<label for="rf-name">Your name <span class="req">*</span></label>' +
@@ -268,6 +273,18 @@
      (list + total + nav/tray via writeCart -> renderCartUI), and
      renderReservationForm() itself closes the modal if the cart
      ends up empty. */
+  var limitMsgTimer = null;
+  // Show the modal's "2 items per order" note briefly (defense-in-depth:
+  // the "+" button is already `disabled` at the cap, so this mainly covers
+  // any click that slips through).
+  function showLimitMsg(scopeEl) {
+    var el = scopeEl.querySelector("[data-limit-msg]");
+    if (!el) return;
+    el.hidden = false;
+    if (limitMsgTimer) clearTimeout(limitMsgTimer);
+    limitMsgTimer = setTimeout(function () { el.hidden = true; }, 3200);
+  }
+
   function wireOrderLineControls(body) {
     var linesEl = body.querySelector(".order-lines");
     if (!linesEl) return;
@@ -284,6 +301,7 @@
       if (action === "remove") {
         setLineQty(item, 0);
       } else if (action === "inc") {
+        if (cartCount() >= MAX_ITEMS) { showLimitMsg(body); return; }
         setLineQty(item, line.qty + 1);
       } else if (action === "dec") {
         setLineQty(item, line.qty - 1); // qty 0 removes the line (setLineQty handles this)

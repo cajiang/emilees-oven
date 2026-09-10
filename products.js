@@ -22,6 +22,20 @@
   var mount = document.getElementById("product-list");
   if (!mount) return;
 
+  // max total packs (sum of quantities) allowed per reservation — sourced
+  // from app.js's single constant, with a same-value fallback if app.js
+  // hasn't set it for some reason.
+  var MAX_ITEMS = (EO && typeof EO.MAX_ITEMS === "number") ? EO.MAX_ITEMS : 2;
+
+  // Update the on-page menu note to state the 2-item rule with an example
+  // (this script runs after the DOM has parsed, since it's loaded at the
+  // end of <body>).
+  var menuNoteEl = document.querySelector(".menu-note");
+  if (menuNoteEl) {
+    menuNoteEl.textContent = "You can reserve up to 2 items per order — mix any two " +
+      "(e.g. a dozen cookies + an 8-pack of scones, or 2 variety boxes).";
+  }
+
   function priceLabel(price) {
     return typeof price === "number" ? (EO ? EO.money(price) : "$" + Number(price).toFixed(2)) : "Price TBD";
   }
@@ -163,7 +177,7 @@
     addRow.className = "add-row";
     addRow.style.padding = "0 20px 20px";
 
-    var maxQty = 10; // no stock data — soft ceiling to keep the stepper reasonable
+    var maxQty = MAX_ITEMS; // a single order can never need more than the 2-item cap
     addRow.innerHTML =
       '<div class="qty-picker" role="group" aria-label="Number of packs for ' + escapeHtml(p.name) + '">' +
         '<button type="button" data-step="-1" aria-label="Decrease quantity">−</button>' +
@@ -171,11 +185,13 @@
           'aria-label="Number of packs for ' + escapeHtml(p.name) + '">' +
         '<button type="button" data-step="1" aria-label="Increase quantity">+</button>' +
       '</div>' +
-      '<button class="btn btn-small" type="button" data-add>Add to reservation</button>';
+      '<button class="btn btn-small" type="button" data-add>Add to reservation</button>' +
+      '<p class="limit-msg" data-add-msg hidden></p>';
 
     var input = addRow.querySelector("input");
     var minus = addRow.querySelector('[data-step="-1"]');
     var plus = addRow.querySelector('[data-step="1"]');
+    var addMsgTimer = null;
 
     function clamp() {
       var v = parseInt(input.value, 10);
@@ -191,15 +207,41 @@
     clamp();
 
     addRow.querySelector("[data-add]").addEventListener("click", function () {
+      var btn = this;
+      var msgEl = addRow.querySelector("[data-add-msg]");
       var qty = parseInt(input.value, 10) || 1;
       var opt = options[selected];
       var lineId = p.id + "__" + opt.id;
       var lineName = options.length > 1 ? (p.name + " — " + opt.label) : p.name;
-      if (EO) EO.cart.add({ id: lineId, name: lineName, price: opt.price }, qty);
-      var btn = this;
+
+      function flashMsg(text) {
+        if (!msgEl) return;
+        msgEl.textContent = text;
+        msgEl.hidden = false;
+        if (addMsgTimer) clearTimeout(addMsgTimer);
+        addMsgTimer = setTimeout(function () { msgEl.hidden = true; }, 3200);
+      }
+
+      var currentCount = EO ? EO.cart.count() : 0;
+      var remaining = MAX_ITEMS - currentCount;
+
+      if (remaining <= 0) {
+        flashMsg("You can reserve up to 2 items per order.");
+        return;
+      }
+
+      var toAdd = Math.min(qty, remaining);
+      if (EO) EO.cart.add({ id: lineId, name: lineName, price: opt.price }, toAdd);
+
       var orig = btn.textContent;
       btn.textContent = "Added ✓";
       setTimeout(function () { btn.textContent = orig; }, 1100);
+
+      if (toAdd < qty) {
+        flashMsg("Added " + toAdd + " — that reaches the 2-item limit per order.");
+      } else if (msgEl) {
+        msgEl.hidden = true;
+      }
     });
 
     el.appendChild(addRow);

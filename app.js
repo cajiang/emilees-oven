@@ -29,7 +29,7 @@
      ORDER-INTAKE-SETUP.md) and both flows work with no other
      code changes.
      ========================================================= */
-  var GOOGLE_SCRIPT_URL = "PLACEHOLDER-apps-script-url"; // SWAP: your deployed Apps Script /exec URL
+  var GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYT2_XHZpfFwCPDWZKcW1yrUIeSOmoUi3M3uKR6d-fWVqs1dw7XYGBxTI6wpCz83PCGg/exec"; // deployed Apps Script /exec URL
   var FORM_TOKEN = "emilees-oven-orders"; // light spam guard, checked (optionally) by the Apps Script
 
   // Low-level POST to the Apps Script Web App.

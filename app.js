@@ -1,5 +1,5 @@
 /* ============================================================
-   Emilees Oven — app.js
+   Emilee's Oven — app.js
    Shared front-end logic: reservation cart, floating tray,
    reservation form modal, confirmation, and the SINGLE
    swappable submission integration point.
@@ -29,7 +29,7 @@
      ORDER-INTAKE-SETUP.md) and both flows work with no other
      code changes.
      ========================================================= */
-  var GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYT2_XHZpfFwCPDWZKcW1yrUIeSOmoUi3M3uKR6d-fWVqs1dw7XYGBxTI6wpCz83PCGg/exec"; // deployed Apps Script /exec URL
+  var GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHAaR1hS-j0fSU3WNcQjf9FMDGKqFgGULk_tfgJFMdj04Df2wjnNCZkObcS-4U6Odh/exec"; // standalone Apps Script → bakers' sheet (Website Orders/Messages tabs)
   var FORM_TOKEN = "emilees-oven-orders"; // light spam guard, checked (optionally) by the Apps Script
 
   // Low-level POST to the Apps Script Web App.
@@ -41,7 +41,7 @@
   function submitToSheet(body) {
     if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.indexOf("PLACEHOLDER") === 0) {
       try {
-        console.info("[Emilees Oven] submitToSheet() — placeholder Apps Script URL, not sending. Payload:", body);
+        console.info("[Emilee's Oven] submitToSheet() — placeholder Apps Script URL, not sending. Payload:", body);
       } catch (e) {}
       return Promise.reject({ ok: false, mode: "placeholder-url", payload: body });
     }
@@ -54,7 +54,7 @@
       return { ok: true, mode: "sheet", payload: body };
     }).catch(function (err) {
       try {
-        console.warn("[Emilees Oven] submitToSheet() — send failed.", err);
+        console.warn("[Emilee's Oven] submitToSheet() — send failed.", err);
       } catch (e) {}
       throw { ok: false, mode: "network-error", payload: body };
     });
@@ -249,7 +249,7 @@
         '<div class="field">' +
           '<label for="rf-phone">Phone</label>' +
           '<input id="rf-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel">' +
-          '<div class="hint">Give an email and/or a phone number so Emilee can confirm.</div>' +
+          '<div class="hint">Enter an email and/or phone — at least one is required so the team can reach you.</div>' +
           '<div class="field-error" data-err="contact" hidden>Please provide an email or a phone number.</div>' +
         '</div>' +
         '<div class="field">' +
@@ -365,12 +365,21 @@
 
     var totalLabel = typeof payload.total === "number" ? money(payload.total) : "Price TBD";
 
+    var contactLine = "";
+    if (payload.customer.email) {
+      contactLine = '<p style="font-size:14px;color:var(--ink-soft);">A receipt has been emailed to you.</p>';
+    } else if (payload.customer.phone) {
+      contactLine = '<p style="font-size:14px;color:var(--ink-soft);">The team will call or text you at the number you provided.</p>';
+    }
+
     body.innerHTML =
       '<button class="modal-close" type="button" data-close aria-label="Close">&times;</button>' +
       '<div class="confirm-check" aria-hidden="true">🍪</div>' +
-      '<h2 style="text-align:center;">Reservation sent!</h2>' +
+      '<h2 style="text-align:center;">Reservation received!</h2>' +
       '<p class="modal-sub" style="text-align:center;">Reservation ' + escapeHtml(payload.reservationId) +
         ' for <strong>' + escapeHtml(payload.customer.name) + '</strong></p>' +
+      '<p class="modal-sub" style="text-align:center;">This isn’t final yet — our baking team will review it, ' +
+        'confirm availability, and contact you (by email or phone) to arrange pickup or drop-off and payment.</p>' +
       '<ul class="order-lines">' + lines +
         '<li class="order-total"><span>Total</span><span>' + totalLabel + '</span></li>' +
       '</ul>' +
@@ -378,13 +387,13 @@
         ? '<p class="mock-flag" style="margin:-10px 0 14px;">Pricing isn’t set yet — Emilee will confirm the price when she confirms your batch.</p>'
         : '') +
       '<div class="pay-box">' +
-        '<h3>How payment will work</h3>' +
-        '<p style="margin:0 0 8px;">Payment is due at delivery. Tips are appreciated, not required.</p>' +
+        '<h3>How you’ll pay once the team confirms</h3>' +
+        '<p style="margin:0 0 8px;">Due at pickup/drop-off. Tips are appreciated, not required.</p>' +
         '<p style="margin:0;">Venmo: <code>' + escapeHtml(PAYMENT.venmo) + '</code><br>' +
         'PayPal: <code>' + escapeHtml(PAYMENT.paypal) + '</code><br>' +
         'Cash: ' + escapeHtml(PAYMENT.cash) + '</p>' +
       '</div>' +
-      '<p style="font-size:14px;color:var(--ink-soft);">Emilee has your reservation and will confirm availability with you directly.</p>' +
+      contactLine +
       '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
         '<button class="btn" type="button" data-close>Done</button>' +
       '</div>';

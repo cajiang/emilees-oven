@@ -29,18 +29,6 @@
       ]
     },
     {
-      "id": "spiced-cinnamon-rolls",
-      "name": "Spiced Cinnamon Rolls",
-      "description": "Warm-spiced cinnamon rolls, baked to order.",
-      "imagePlaceholderLabel": "Spiced Cinnamon Rolls",
-      "allergens": ["Dairy", "Eggs", "Wheat"],
-      "allergensTBD": false,
-      "options": [
-        { "id": "4", "label": "4-pack (4)", "count": 4, "price": 15 },
-        { "id": "8", "label": "8-pack (8)", "count": 8, "price": 25 }
-      ]
-    },
-    {
       "id": "cranberry-orange-scones",
       "name": "Cranberry Orange Scones",
       "description": "Tender scones with cranberry and orange.",

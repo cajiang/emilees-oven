@@ -44,7 +44,7 @@
     {
       "id": "variety-box",
       "name": "Variety Box",
-      "description": "A taste of the September menu: 3 milk chocolate chip cookies, 3 pumpkin spice cream pies, and 2 cranberry orange scones.",
+      "description": "A taste of the September menu: 4 milk chocolate chip cookies, 3 pumpkin spice cream pies, and 3 cranberry orange scones.",
       "imagePlaceholderLabel": "Variety Box",
       "allergens": ["Dairy", "Eggs", "Wheat", "Soy"],
       "allergensTBD": true,
